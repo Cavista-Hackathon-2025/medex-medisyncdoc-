@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class DoctorProfileScreen extends StatefulWidget {
   const DoctorProfileScreen({Key? key}) : super(key: key);
@@ -8,31 +10,89 @@ class DoctorProfileScreen extends StatefulWidget {
 }
 
 class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
-  // 0: Note, 1: Voice Note, 2: Body Cam, 3: Prescription
   int _currentTabIndex = 0;
-
-  // Controllers for text input areas
   final TextEditingController noteController = TextEditingController();
   final TextEditingController prescriptionController = TextEditingController();
+  final TextEditingController doctorNameController = TextEditingController();
 
-  // Lists to hold voice notes and video recordings
   List<String> voiceNotes = [];
   List<String> bodyCamVideos = [];
-
-  // Recording states
   bool _isRecordingVoice = false;
   bool _isRecordingVideo = false;
   int voiceCounter = 1;
   int videoCounter = 1;
+  String? profileImagePath;
+  final ImagePicker _picker = ImagePicker();
+  bool _isSaved = false; // Track if the doctor profile is saved
 
   @override
   void dispose() {
     noteController.dispose();
     prescriptionController.dispose();
+    doctorNameController.dispose();
     super.dispose();
   }
 
-  // Build the top bar with the four menu options
+  // Pick or take a profile picture
+  void _pickProfileImage() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera),
+              title: const Text("Take Photo"),
+              onTap: () async {
+                final XFile? pickedFile = await _picker.pickImage(source: ImageSource.camera);
+                if (pickedFile != null) {
+                  setState(() {
+                    profileImagePath = pickedFile.path;
+                  });
+                }
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo),
+              title: const Text("Choose from Gallery"),
+              onTap: () async {
+                final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+                if (pickedFile != null) {
+                  setState(() {
+                    profileImagePath = pickedFile.path;
+                  });
+                }
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Save doctor profile and return to patient screen
+  void _saveDoctorProfile() {
+    if (doctorNameController.text.isNotEmpty) {
+      setState(() {
+        _isSaved = true;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("${doctorNameController.text} has been saved to patient records"),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+
+      // Simulate returning to patient screen after save
+      Future.delayed(const Duration(seconds: 2), () {
+        Navigator.pop(context);
+      });
+    }
+  }
+
   Widget _buildTopBar() {
     final tabs = ["Note", "Voice Note", "Body Cam", "Prescription"];
     return Row(
@@ -70,10 +130,9 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
     );
   }
 
-  // Build the content area based on the selected tab
   Widget _buildContent() {
     switch (_currentTabIndex) {
-      case 0: // Note section with a text area
+      case 0:
         return Padding(
           padding: const EdgeInsets.all(16.0),
           child: TextField(
@@ -85,7 +144,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
             ),
           ),
         );
-      case 1: // Voice Note section with a list and space for the record button
+      case 1:
         return Column(
           children: [
             Expanded(
@@ -99,10 +158,10 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                 },
               ),
             ),
-            const SizedBox(height: 80), // leave space for record button
+            const SizedBox(height: 80),
           ],
         );
-      case 2: // Body Cam section with a list and space for the record button
+      case 2:
         return Column(
           children: [
             Expanded(
@@ -116,10 +175,10 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                 },
               ),
             ),
-            const SizedBox(height: 80), // leave space for record button
+            const SizedBox(height: 80),
           ],
         );
-      case 3: // Prescription section with a text area
+      case 3:
         return Padding(
           padding: const EdgeInsets.all(16.0),
           child: TextField(
@@ -136,31 +195,26 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
     }
   }
 
-  // Toggle voice recording simulation
   void _toggleVoiceRecording() {
     setState(() {
       _isRecordingVoice = !_isRecordingVoice;
       if (!_isRecordingVoice) {
-        // When stopped, add a new voice note placeholder
         voiceNotes.add("Voice Note #$voiceCounter");
         voiceCounter++;
       }
     });
   }
 
-  // Toggle video recording simulation for body cam
   void _toggleVideoRecording() {
     setState(() {
       _isRecordingVideo = !_isRecordingVideo;
       if (!_isRecordingVideo) {
-        // When stopped, add a new video placeholder
         bodyCamVideos.add("Video Recording #$videoCounter");
         videoCounter++;
       }
     });
   }
 
-  // Show a record button only on the Voice Note or Body Cam sections
   Widget? _buildFloatingActionButton() {
     if (_currentTabIndex == 1) {
       return FloatingActionButton(
@@ -182,8 +236,15 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false, // Remove Back Arrow
         title: const Text("Doctor Profile"),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.check), // Mark Icon instead of Save
+            onPressed: _saveDoctorProfile,
+          ),
+        ],
       ),
       floatingActionButton: _buildFloatingActionButton(),
       body: Column(
@@ -192,26 +253,31 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             child: Column(
-              children: const [
-                CircleAvatar(
-                  radius: 40,
-                  child: Icon(Icons.person, size: 40),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  "Dr. John Doe",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+              children: [
+                GestureDetector(
+                  onTap: _pickProfileImage,
+                  child: CircleAvatar(
+                    radius: 40,
+                    backgroundColor: Colors.grey[300],
+                    backgroundImage: profileImagePath != null ? FileImage(File(profileImagePath!)) : null,
+                    child: profileImagePath == null ? const Icon(Icons.camera_alt, size: 40) : null,
                   ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: doctorNameController,
+                  textAlign: TextAlign.center,
+                  decoration: const InputDecoration(
+                    hintText: "Enter Doctor Name",
+                    border: InputBorder.none,
+                  ),
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
           ),
-          // Top bar menu
           _buildTopBar(),
           const Divider(),
-          // Content based on selected tab
           Expanded(child: _buildContent()),
         ],
       ),

@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'doctor_view.dart';
 import '../../common_widget/round_button.dart';
-import '../../common/color_extension.dart';// Importing color extension
+import '../../common/color_extension.dart';
 
 class PatientScreen extends StatefulWidget {
   final Map<String, dynamic> patient;
@@ -48,8 +48,7 @@ class _PatientScreenState extends State<PatientScreen> {
               leading: const Icon(Icons.camera),
               title: const Text("Take Photo"),
               onTap: () async {
-                final XFile? pickedFile =
-                await _picker.pickImage(source: ImageSource.camera);
+                final XFile? pickedFile = await _picker.pickImage(source: ImageSource.camera);
                 if (pickedFile != null) {
                   setState(() {
                     imagePath = pickedFile.path;
@@ -62,8 +61,7 @@ class _PatientScreenState extends State<PatientScreen> {
               leading: const Icon(Icons.photo),
               title: const Text("Choose from Gallery"),
               onTap: () async {
-                final XFile? pickedFile =
-                await _picker.pickImage(source: ImageSource.gallery);
+                final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
                 if (pickedFile != null) {
                   setState(() {
                     imagePath = pickedFile.path;
@@ -90,10 +88,7 @@ class _PatientScreenState extends State<PatientScreen> {
             decoration: const InputDecoration(hintText: "Enter new value"),
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel"),
-            ),
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
             TextButton(
               onPressed: () {
                 setState(() {});
@@ -130,7 +125,7 @@ class _PatientScreenState extends State<PatientScreen> {
   Future<void> addDoctor() async {
     final String? newDoctor = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => DoctorProfileScreen()),
+      MaterialPageRoute(builder: (context) => const DoctorProfileScreen()),
     );
 
     if (newDoctor != null && newDoctor.isNotEmpty) {
@@ -159,7 +154,7 @@ class _PatientScreenState extends State<PatientScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: TColor.white, // Applying theme color
+      backgroundColor: Colors.white, // Applying theme color
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Column(
@@ -169,16 +164,16 @@ class _PatientScreenState extends State<PatientScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const SizedBox(width: 40),
-                Text(
+                const Text(
                   "Patient",
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: TColor.primaryText,
+                    color: Colors.black,
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.add, size: 28, color: TColor.primary),
+                  icon: const Icon(Icons.add, size: 28, color: Colors.blue),
                   onPressed: addDoctor,
                 ),
               ],
@@ -190,9 +185,9 @@ class _PatientScreenState extends State<PatientScreen> {
               onTap: pickImage,
               child: CircleAvatar(
                 radius: 50,
-                backgroundColor: TColor.placeholder,
+                backgroundColor: Colors.grey[300],
                 child: imagePath == null || imagePath!.isEmpty
-                    ? Icon(Icons.person, size: 50, color: TColor.secondaryText)
+                    ? const Icon(Icons.person, size: 50, color: Colors.black)
                     : ClipOval(
                   child: Image.file(
                     File(imagePath!),
@@ -204,7 +199,7 @@ class _PatientScreenState extends State<PatientScreen> {
               ),
             ),
 
-            // **Patient Name & Patient ID—Now Touching**
+            // **Patient Name & Patient ID**
             Column(
               children: [
                 Row(
@@ -212,14 +207,14 @@ class _PatientScreenState extends State<PatientScreen> {
                   children: [
                     Text(
                       nameController.text,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: TColor.primaryText,
+                        color: Colors.black,
                       ),
                     ),
                     IconButton(
-                      icon: Icon(Icons.edit, size: 18, color: TColor.primary),
+                      icon: const Icon(Icons.edit, size: 18, color: Colors.blue),
                       onPressed: () => editField(nameController),
                     ),
                   ],
@@ -229,10 +224,10 @@ class _PatientScreenState extends State<PatientScreen> {
                   children: [
                     Text(
                       "Patient ID: ${idController.text}",
-                      style: TextStyle(fontSize: 16, color: TColor.secondaryText),
+                      style: const TextStyle(fontSize: 16, color: Colors.black54),
                     ),
                     IconButton(
-                      icon: Icon(Icons.edit, size: 18, color: TColor.primary),
+                      icon: const Icon(Icons.edit, size: 18, color: Colors.blue),
                       onPressed: () => editField(idController),
                     ),
                   ],
@@ -242,56 +237,45 @@ class _PatientScreenState extends State<PatientScreen> {
 
             const SizedBox(height: 10),
 
-            // **Centered Treatment Title with Shadow**
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle, // ✅ Round Icon Button
-                color: TColor.primary.withOpacity(0.1), // ✅ Subtle Background
-              ),
-              child: Center(
-                child: Text(
-                  "Treatment",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: TColor.primaryText,
-                  ),
-                ),
+            // **Treatment Title**
+            const Text(
+              "Doctors Assigned",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
               ),
             ),
 
-
             const SizedBox(height: 10),
 
-            // **Swipe-to-Delete Effect for Doctors**
+            // **Doctor Cards (Added when Save Button is Clicked in Doctor Screen)**
             Expanded(
               child: ListView.builder(
                 itemCount: doctors.length,
                 itemBuilder: (context, index) {
-                  return Dismissible(
-                    key: Key(doctors[index]),
-                    direction: DismissDirection.endToStart,
-                    onDismissed: (direction) {
-                      deleteDoctor(index);
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const DoctorProfileScreen(),
+                        ),
+                      );
                     },
-                    background: Container(
-                      alignment: Alignment.centerRight,
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      color: Colors.red,
-                      child: const Icon(Icons.delete, color: Colors.white),
-                    ),
                     child: Card(
-                      color: TColor.white, // ✅ Styled card background
                       elevation: 4,
                       margin: const EdgeInsets.symmetric(vertical: 5),
                       child: ListTile(
-                        leading: Icon(Icons.local_hospital, color: TColor.primary),
+                        leading: const Icon(Icons.local_hospital, color: Colors.blue),
                         title: Text(
                           doctors[index],
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, color: TColor.primaryText),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
                         ),
+                        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                       ),
                     ),
                   );
@@ -300,6 +284,7 @@ class _PatientScreenState extends State<PatientScreen> {
             ),
 
             const SizedBox(height: 10),
+
             // **Save & Discharge Buttons**
             Row(
               children: [

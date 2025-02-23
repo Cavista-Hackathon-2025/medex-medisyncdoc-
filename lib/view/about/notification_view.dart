@@ -13,35 +13,35 @@ class NotificationsView extends StatefulWidget {
 class _NotificationsViewState extends State<NotificationsView> {
   List notificationArr = [
     {
-      "title": "Your orders has been picked up",
+      "title": "take an hike",
       "time": "Now",
     },
     {
-      "title": "Your order has been delivered",
+      "title": "use your drug",
       "time": "1 h ago",
     },
     {
-      "title": "Your orders has been picked up",
+      "title": "do 20 press up",
       "time": "3 h ago",
     },
     {
-      "title": "Your order has been delivered",
+      "title": "use you prescribed drug",
       "time": "5 h ago",
     },
     {
-      "title": "Your orders has been picked up",
+      "title": "jumping jack",
       "time": "05 Jun 2023",
     },
     {
-      "title": "Your order has been delivered",
+      "title": "press up",
       "time": "05 Jun 2023",
     },
     {
-      "title": "Your orders has been picked up",
+      "title": "use your medications",
       "time": "06 Jun 2023",
     },
     {
-      "title": "Your order has been delivered",
+      "title": "press up",
       "time": "06 Jun 2023",
     },
   ];
